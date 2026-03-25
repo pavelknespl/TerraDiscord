@@ -5,6 +5,7 @@ from discord.ext import commands
 from typing import List
 from .config import TOKEN
 from .presets_util import get_preset_list, apply_preset
+from . import channels, roles
 
 class DiscordAsCodeBot(commands.Bot):
     def __init__(self):
@@ -46,6 +47,17 @@ async def set_preset_cmd(interaction: discord.Interaction, preset: str):
     try:
         await apply_preset(interaction.guild, preset, clear_all=True, skip_id=interaction.channel.id)
         await interaction.followup.send(f"Server reset and preset '{preset}' applied.", ephemeral=True)
+    except Exception as e:
+        await interaction.followup.send(f"Error: {str(e)}", ephemeral=True)
+
+@bot.tree.command(name="reset", description="Delete ALL roles and channels")
+@app_commands.checks.has_permissions(administrator=True)
+async def reset_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    try:
+        await roles.clear_all(interaction.guild)
+        await channels.clear_all(interaction.guild, skip_id=interaction.channel.id)
+        await interaction.followup.send("Server cleared. All roles and channels deleted.", ephemeral=True)
     except Exception as e:
         await interaction.followup.send(f"Error: {str(e)}", ephemeral=True)
 
