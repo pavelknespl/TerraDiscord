@@ -3,7 +3,7 @@ import json
 import discord
 from typing import List
 from .config import PRESETS_DIR
-from . import channels
+from . import channels, roles
 
 def get_preset_list() -> List[str]:
     if not os.path.exists(PRESETS_DIR): return []
@@ -17,7 +17,11 @@ async def apply_preset(server: discord.Guild, preset_name: str, clear_all: bool 
         config = json.load(f)
 
     if clear_all:
+        await roles.clear_all(server)
         await channels.clear_all(server, skip_id)
+
+    for role_data in config.get('roles', []):
+        await roles.create_role(server, role_data)
 
     for cat_data in config.get('categories', []):
         cat_name = cat_data.get('name')
