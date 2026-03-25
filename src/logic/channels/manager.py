@@ -1,19 +1,20 @@
 import discord
+from .permissions import get_channel_overwrites
 
 async def clear_all(server: discord.Guild, skip_id: int = None):
     for category in server.categories:
         for channel in category.channels:
             if channel.id != skip_id:
                 try: await channel.delete()
-                except discord.HTTPException: pass
+                except: pass
         if not category.channels:
             try: await category.delete()
-            except discord.HTTPException: pass
+            except: pass
     
     for channel in server.channels:
         if channel.id != skip_id:
             try: await channel.delete()
-            except discord.HTTPException: pass
+            except: pass
 
 async def create_category(server: discord.Guild, name: str):
     try:
@@ -21,26 +22,14 @@ async def create_category(server: discord.Guild, name: str):
         if not category:
             category = await server.create_category(name)
         return category
-    except discord.Forbidden:
-        print(f"Missing permissions to create category: {name}")
-        return None
-    except discord.HTTPException:
+    except:
         return None
 
 async def create_channel(server: discord.Guild, category: discord.CategoryChannel, name: str, ch_type: str, perms_data: dict = None):
     existing = discord.utils.get(category.channels if category else server.channels, name=name)
     if existing: return
 
-    overwrites = {}
-    if perms_data:
-        for role_name, perms in perms_data.items():
-            role = discord.utils.get(server.roles, name=role_name)
-            if role:
-                overwrite = discord.PermissionOverwrite()
-                for perm_name, value in perms.items():
-                    if hasattr(overwrite, perm_name):
-                        setattr(overwrite, perm_name, value)
-                overwrites[role] = overwrite
+    overwrites = get_channel_overwrites(server, perms_data) if perms_data else {}
 
     try:
         if ch_type == 'voice':
@@ -54,7 +43,7 @@ async def create_channel(server: discord.Guild, category: discord.CategoryChanne
             except: await server.create_text_channel(name, category=category, overwrites=overwrites)
         else:
             await server.create_text_channel(name, category=category, overwrites=overwrites)
-    except (discord.Forbidden, discord.HTTPException):
+    except:
         try:
             if ch_type != 'text':
                 await server.create_text_channel(name, category=category, overwrites=overwrites)

@@ -1,4 +1,5 @@
 import discord
+from .permissions import get_role_permissions
 
 async def clear_all(server: discord.Guild):
     for role in server.roles:
@@ -16,12 +17,7 @@ async def create_role(server: discord.Guild, data: dict):
         try: color = discord.Color.from_str(hex_code)
         except: pass
 
-    perms_data = data.get("permissions", {})
-    permissions = discord.Permissions()
-    for perm_name, value in perms_data.items():
-        if hasattr(permissions, perm_name):
-            setattr(permissions, perm_name, value)
-
+    permissions = get_role_permissions(data.get("permissions", {}))
     hoist = data.get("hoist", False)
     mentionable = data.get("mentionable", False)
 
@@ -36,4 +32,4 @@ async def create_role(server: discord.Guild, data: dict):
                 permissions=permissions
             )
         except (discord.Forbidden, discord.HTTPException):
-            print(f"Failed to create role: {name}")
+            pass
