@@ -4,7 +4,7 @@ async def clear_all(server: discord.Guild):
     for role in server.roles:
         if role.name != "@everyone" and not role.managed:
             try: await role.delete()
-            except: pass
+            except (discord.HTTPException, discord.Forbidden): pass
 
 async def create_role(server: discord.Guild, data: dict):
     name = data.get("name")
@@ -27,10 +27,13 @@ async def create_role(server: discord.Guild, data: dict):
 
     existing = discord.utils.get(server.roles, name=name)
     if not existing:
-        await server.create_role(
-            name=name,
-            color=color,
-            hoist=hoist,
-            mentionable=mentionable,
-            permissions=permissions
-        )
+        try:
+            await server.create_role(
+                name=name,
+                color=color,
+                hoist=hoist,
+                mentionable=mentionable,
+                permissions=permissions
+            )
+        except (discord.Forbidden, discord.HTTPException):
+            print(f"Failed to create role: {name}")

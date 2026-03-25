@@ -5,24 +5,30 @@ async def clear_all(server: discord.Guild, skip_id: int = None):
         for channel in category.channels:
             if channel.id != skip_id:
                 try: await channel.delete()
-                except: pass
+                except discord.HTTPException: pass
         if not category.channels:
             try: await category.delete()
-            except: pass
+            except discord.HTTPException: pass
     
     for channel in server.channels:
         if channel.id != skip_id:
             try: await channel.delete()
-            except: pass
+            except discord.HTTPException: pass
 
 async def create_category(server: discord.Guild, name: str):
-    category = discord.utils.get(server.categories, name=name)
-    if not category:
-        category = await server.create_category(name)
-    return category
+    try:
+        category = discord.utils.get(server.categories, name=name)
+        if not category:
+            category = await server.create_category(name)
+        return category
+    except discord.Forbidden:
+        print(f"Missing permissions to create category: {name}")
+        return None
+    except discord.HTTPException:
+        return None
 
 async def create_channel(server: discord.Guild, category: discord.CategoryChannel, name: str, ch_type: str, perms_data: dict = None):
-    existing = discord.utils.get(category.channels, name=name)
+    existing = discord.utils.get(category.channels if category else server.channels, name=name)
     if existing: return
 
     overwrites = {}
@@ -44,14 +50,12 @@ async def create_channel(server: discord.Guild, category: discord.CategoryChanne
         elif ch_type == 'stage':
             await server.create_stage_channel(name, category=category, overwrites=overwrites)
         elif ch_type == 'news':
-            try:
-                await server.create_text_channel(name, category=category, overwrites=overwrites, news=True)
-            except:
-                await server.create_text_channel(name, category=category, overwrites=overwrites)
+            try: await server.create_text_channel(name, category=category, overwrites=overwrites, news=True)
+            except: await server.create_text_channel(name, category=category, overwrites=overwrites)
         else:
             await server.create_text_channel(name, category=category, overwrites=overwrites)
-    except Exception as e:
+    except (discord.Forbidden, discord.HTTPException):
         try:
-            await server.create_text_channel(name, category=category, overwrites=overwrites)
-        except:
-            print(f"Failed to create channel {name}: {e}")
+            if ch_type != 'text':
+                await server.create_text_channel(name, category=category, overwrites=overwrites)
+        except: pass
