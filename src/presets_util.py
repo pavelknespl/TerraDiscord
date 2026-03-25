@@ -13,15 +13,21 @@ async def clear_server_channels(server: discord.Guild, skip_id: int = None):
     for category in server.categories:
         for channel in category.channels:
             if channel.id != skip_id:
-                await channel.delete()
+                try:
+                    await channel.delete()
+                except:
+                    pass
         if not category.channels:
-            await category.delete()
+            try:
+                await category.delete()
+            except:
+                pass
     
     for channel in server.channels:
         if channel.id != skip_id:
             try:
                 await channel.delete()
-            except discord.NotFound:
+            except:
                 pass
 
 async def apply_preset(server: discord.Guild, preset_name: str, clear_all: bool = False, skip_id: int = None):
@@ -45,8 +51,13 @@ async def apply_preset(server: discord.Guild, preset_name: str, clear_all: bool 
             name = ch_data.get('name')
             ch_type = ch_data.get('type', 'text')
             existing = discord.utils.get(category.channels, name=name)
+            
             if not existing:
                 if ch_type == 'text':
                     await server.create_text_channel(name, category=category)
                 elif ch_type == 'voice':
                     await server.create_voice_channel(name, category=category)
+                elif ch_type == 'news':
+                    await server.create_text_channel(name, category=category, type=discord.ChannelType.news)
+                elif ch_type == 'forum':
+                    await server.create_forum_channel(name, category=category)
