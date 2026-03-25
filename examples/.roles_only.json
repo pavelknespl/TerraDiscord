@@ -1,0 +1,6 @@
+{
+  "roles": [
+    { "name": "Admin", "hex": "#ff0000" },
+    { "name": "Member", "hex": "#00ff00" }
+  ]
+}

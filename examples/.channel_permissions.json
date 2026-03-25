@@ -1,0 +1,29 @@
+{
+  "roles": [
+    { "name": "Admin", "hex": "#ff0000" },
+    { "name": "Member", "hex": "#3498db" }
+  ],
+  "categories": [
+    {
+      "name": "PRIVATE ZONE",
+      "channels": [
+        {
+          "name": "staff-chat",
+          "type": "text",
+          "permissions": {
+            "@everyone": { "view_channel": false },
+            "Admin": { "view_channel": true }
+          }
+        },
+        {
+          "name": "read-only-news",
+          "type": "text",
+          "permissions": {
+            "@everyone": { "send_messages": false },
+            "Admin": { "send_messages": true }
+          }
+        }
+      ]
+    }
+  ]
+}

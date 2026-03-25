@@ -1,18 +1,30 @@
 import os
 import json
 import discord
-from typing import List
-from ..core.config import PRESETS_DIR
+from typing import List, Dict
+from ..core.config import PRESETS_DIR, EXAMPLES_DIR
 from ..logic.roles import manager as roles_manager
 from ..logic.channels import manager as channels_manager
 
+def _get_files_from_dir(dir_path: str) -> Dict[str, str]:
+    if not os.path.exists(dir_path): return {}
+    files = {}
+    for f in os.listdir(dir_path):
+        if f.endswith('.json') and not f.startswith('.'):
+            name = f.replace('.json', '')
+            files[name] = os.path.join(dir_path, f)
+    return files
+
 def get_preset_list() -> List[str]:
-    if not os.path.exists(PRESETS_DIR): return []
-    return [f.replace('.json', '') for f in os.listdir(PRESETS_DIR) if f.endswith('.json')]
+    all_files = {**_get_files_from_dir(PRESETS_DIR), **_get_files_from_dir(EXAMPLES_DIR)}
+    return sorted(list(all_files.keys()))
 
 async def apply_preset(server: discord.Guild, preset_name: str, clear_all: bool = False, skip_id: int = None):
-    file_path = os.path.join(PRESETS_DIR, f"{preset_name}.json")
-    if not os.path.exists(file_path): raise FileNotFoundError(f"Preset '{preset_name}' not found.")
+    all_files = {**_get_files_from_dir(PRESETS_DIR), **_get_files_from_dir(EXAMPLES_DIR)}
+    file_path = all_files.get(preset_name)
+    
+    if not file_path or not os.path.exists(file_path):
+        raise FileNotFoundError(f"Preset '{preset_name}' not found.")
 
     with open(file_path, 'r', encoding='utf-8') as f:
         config = json.load(f)

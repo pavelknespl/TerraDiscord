@@ -1,0 +1,11 @@
+{
+  "categories": [
+    {
+      "name": "PUBLIC",
+      "channels": [
+        { "name": "chat", "type": "text" },
+        { "name": "voice", "type": "voice" }
+      ]
+    }
+  ]
+}

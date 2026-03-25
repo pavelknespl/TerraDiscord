@@ -1,0 +1,27 @@
+{
+  "roles": [
+    {
+      "name": "Staff",
+      "hex": "#e74c3c",
+      "hoist": true,
+      "permissions": {
+        "manage_guild": true,
+        "manage_roles": true,
+        "manage_channels": true,
+        "kick_members": true,
+        "ban_members": true,
+        "manage_messages": true
+      }
+    },
+    {
+      "name": "Member",
+      "hex": "#3498db",
+      "permissions": {
+        "send_messages": true,
+        "read_message_history": true,
+        "connect": true,
+        "speak": true
+      }
+    }
+  ]
+}
