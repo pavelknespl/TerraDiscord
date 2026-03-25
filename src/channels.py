@@ -33,3 +33,5 @@ async def create_channel(server: discord.Guild, category: discord.CategoryChanne
         await server.create_text_channel(name, category=category, type=discord.ChannelType.news)
     elif ch_type == 'forum':
         await server.create_forum_channel(name, category=category)
+    elif ch_type == 'stage':
+        await server.create_stage_channel(name, category=category)
