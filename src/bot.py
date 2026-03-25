@@ -5,7 +5,7 @@ from discord.ext import commands
 from typing import List
 from .config import TOKEN
 from .presets_util import get_preset_list, apply_preset
-from . import channels, roles
+from . import channels, roles, exporter
 
 class DiscordAsCodeBot(commands.Bot):
     def __init__(self):
@@ -58,6 +58,16 @@ async def reset_cmd(interaction: discord.Interaction):
         await roles.clear_all(interaction.guild)
         await channels.clear_all(interaction.guild, skip_id=interaction.channel.id)
         await interaction.followup.send("Server cleared. All roles and channels deleted.", ephemeral=True)
+    except Exception as e:
+        await interaction.followup.send(f"Error: {str(e)}", ephemeral=True)
+
+@bot.tree.command(name="export", description="Export current server structure to JSON")
+@app_commands.checks.has_permissions(administrator=True)
+async def export_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    try:
+        filename = await exporter.export_server(interaction.guild)
+        await interaction.followup.send(f"Server structure exported to 'exports/{filename}'.", ephemeral=True)
     except Exception as e:
         await interaction.followup.send(f"Error: {str(e)}", ephemeral=True)
 
